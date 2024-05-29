@@ -18,7 +18,7 @@ var DownloadDirItem = &Item{Label: "Download Dir", Details: "Select a download d
 
 func PhotosUI() {
 	sel := promptui.Select{}
-	sel.Items = []*Item{PeriodItem, YearItem, MonthItem, CountPhotosItem, CountPhotosWithSizeItem, DownloadDirItem, DownloadPhotosItem, back}
+	sel.Items = []*Item{YearItem, MonthItem, CountPhotosItem, CountPhotosWithSizeItem, DownloadDirItem, DownloadPhotosItem, back}
 	sel.Label = "Select an option"
 	sel.Templates = ItemTemplate
 	var year, month int
@@ -58,7 +58,7 @@ func PhotosUI() {
 				fmt.Println("Error counting photos", err)
 				return
 			}
-			fmt.Println("Found", c, "photos with total size", photos.HumanReadableSize(s))
+			fmt.Println("Found", c, "photos with total size", HumanReadableSize(s))
 
 		case DownloadDirItem.Label:
 			pr := promptui.Prompt{Label: "Enter download directory", Default: DownloadDirItem.Value}
@@ -75,7 +75,7 @@ func PhotosUI() {
 				fmt.Println("Error downloading photos", err)
 				return
 			}
-			fmt.Println("Downloaded", c, "photos with total size", photos.HumanReadableSize(s))
+			fmt.Println("Downloaded", c, "photos with total size", HumanReadableSize(s))
 		case back.Label:
 			return
 		}

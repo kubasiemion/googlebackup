@@ -20,6 +20,7 @@ import (
 var token *oauth2.Token
 var config *oauth2.Config
 var selfaddress = "http://localhost:18080/token"
+var promptaddress = "http://localhost:18080/prompt"
 
 func init() {
 	b, err := os.ReadFile("credentials.json")
@@ -33,15 +34,7 @@ func init() {
 	}
 	config.RedirectURL = selfaddress
 	//---------------------
-	http.HandleFunc("/token", func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
-		r.FormValue("code")
-		if r.FormValue("code") != "" {
-			tokenreceived <- r.FormValue("code")
-			fmt.Fprintf(w, "Token received. You can close this tab now.")
-		}
-	})
-	//---------------------
+
 	token, err = TokenFromFile(TokenFile)
 	if err != nil {
 		log.Println(err)
@@ -66,10 +59,8 @@ func GetClient(ctx context.Context) (*http.Client, error) {
 // It returns the retrieved Token.
 func GetTokenFromWeb(ctx context.Context) error {
 
-	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	//fmt.Printf("Go to the following link in your browser then type the authorization code: \n%v\n", authURL)
 	go srv.ListenAndServe()
-	err := OpenInBrowser(authURL)
+	err := OpenInBrowser(promptaddress) //authURL)
 	if err != nil {
 		return fmt.Errorf("unable to open browser: %w", err)
 
@@ -170,7 +161,3 @@ func OpenInBrowser(url string) error {
 }
 
 var tokenreceived = make(chan string)
-
-var srv = http.Server{
-	Addr: ":18080",
-}

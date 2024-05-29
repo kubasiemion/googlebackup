@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/kubasiemion/googlebackup/service"
 	"google.golang.org/api/gmail/v1"
 )
 
@@ -74,38 +75,31 @@ func ListEmailsByMonth(service *gmail.Service, user string, year int, month int,
 
 }
 
-/*
-srv, err := service.GetService()
-	user := "me"
-
-	//query := fmt.Sprintf("STATEMENT OF INCOME 2018 IN SPAIN")
-	query := fmt.Sprintf("rfc822msgid:%s", "1503754224.99672026@emsgrid.com1503754224")
-	var NextPageToken = new(string)
-	msgs, err := mail.QueryMessages(context.Background(), srv, user, query, 100, NextPageToken)
+func CountMail(year, month int, withSize bool) (count int, size int64, err error) {
+	srv, err := service.GetService()
 	if err != nil {
-		log.Fatalf("Unable to retrieve messages: %v", err)
+		return
 	}
-
-	for _, msg := range msgs {
-		m, err := srv.Users.Messages.Get(user, msg.Id).Format("full").Do()
+	user := "me"
+	pageToken := ""
+	for {
+		messages, err := ListEmailsByMonth(srv, user, year, month, &pageToken)
 		if err != nil {
-			log.Fatalf("Unable to retrieve message: %v", err)
+			return 0, 0, err
 		}
-		fmt.Printf("Message <%s> snippet: %s\n", msg.Id, msg.Snippet)
-		fmt.Println(m.ForceSendFields)
-		tim := time.Unix(m.InternalDate/1000, 0)
-		fmt.Println(tim)
-		fmt.Println(m.Payload.Filename)
-		fmt.Println(mail.SizeMessage(srv, user, m))
-		names, bts, err := mail.GetAttachments(srv, user, m)
-		if err != nil {
-			log.Fatalf("Unable to retrieve attachments: %v", err)
+		count += len(messages)
+		if withSize {
+			for _, m := range messages {
+				msg, err := srv.Users.Messages.Get(user, m.Id).Do()
+				if err != nil {
+					return 0, 0, fmt.Errorf("error retrieving message %s: %w", m.Id, err)
+				}
+				size += msg.SizeEstimate
+			}
 		}
-		for i, name := range names {
-			fmt.Printf("Attachment %s: %d bytes\n", name, len(bts[i]))
+		if pageToken == "" {
+			break
 		}
-		_, err = mail.GetMessageBody(m)
-		if err != nil {
-			log.Fatalf("Unable to retrieve body: %v", err)
-		}
-*/
+	}
+	return
+}
