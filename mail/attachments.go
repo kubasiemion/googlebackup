@@ -7,6 +7,18 @@ import (
 	"google.golang.org/api/gmail/v1"
 )
 
+func CountMailWithAttachments(year, month int) (count int, err error) {
+	query := "has:attachment"
+
+	count, _, err = CountMail(year, month, false, query)
+	return
+}
+
+func DownloadAttachments(year, month int) (count int, err error) {
+	err = fmt.Errorf("downoad of attachments not implemented")
+	return
+}
+
 // Retrieves and returns the attachments of a message.
 func GetAttachments(srv *gmail.Service, user string, message *gmail.Message) (names []string, contents [][]byte, err error) {
 	for _, part := range message.Payload.Parts {
