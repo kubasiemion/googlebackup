@@ -15,7 +15,7 @@ var DownloadAttachmentsItem = &Item{Label: "Download attachments", Details: "Dow
 
 func MailUI() {
 	sel := promptui.Select{}
-	sel.Items = []*Item{YearItem, MonthItem, CountMailItem, CountMailWithAttachmentsItem, CountMailWithSizeItem, DownloadAttachmentsItem, back}
+	sel.Items = []*Item{YearItem, MonthItem, CountMailItem, CountMailWithAttachmentsItem, CountMailWithSizeItem, DownloadDirItem, DownloadAttachmentsItem, back}
 	sel.Label = "Select an option"
 	sel.Templates = ItemTemplate
 	var year, month int
@@ -64,7 +64,7 @@ func MailUI() {
 			}
 			fmt.Println("Found", c, "mail with attachments")
 		case DownloadAttachmentsItem.Label:
-			_, err := mail.DownloadAttachments(year, month)
+			_, err := mail.DownloadAttachments(year, month, DownloadDirItem.Value)
 			if err != nil {
 				fmt.Println("Error downloading attachments", err)
 				return

@@ -3,7 +3,9 @@ package mail
 import (
 	"encoding/base64"
 	"fmt"
+	"os"
 
+	"github.com/kubasiemion/googlebackup/service"
 	"google.golang.org/api/gmail/v1"
 )
 
@@ -14,9 +16,41 @@ func CountMailWithAttachments(year, month int) (count int, err error) {
 	return
 }
 
-func DownloadAttachments(year, month int) (count int, err error) {
-	err = fmt.Errorf("downoad of attachments not implemented")
+func DownloadAttachments(year, month int, dir string) (count int, err error) {
+	query := "has:attachment"
+	srv, err := service.GetService()
+	if err != nil {
+		return
+	}
+	user := "me"
+	pageToken := ""
+	messages, err := ListEmailsByMonth(srv, user, year, month, &pageToken, false, query)
+	if err != nil {
+		return 0, err
+	}
+	count += len(messages)
+	for _, m := range messages {
+		msg, err := srv.Users.Messages.Get(user, m.Id).Do()
+		if err != nil {
+			return 0, fmt.Errorf("error retrieving message %s: %w", m.Id, err)
+		}
+		names, contents, err := GetAttachments(srv, user, msg)
+		if err != nil {
+			return 0, fmt.Errorf("error retrieving attachments for message %s: %w", m.Id, err)
+		}
+		for i, name := range names {
+			err = SaveAttachment(fmt.Sprintf("%s/%s", dir, name), contents[i])
+			if err != nil {
+				return 0, fmt.Errorf("error saving attachment %s: %w", name, err)
+			}
+		}
+	}
 	return
+}
+
+func SaveAttachment(name string, content []byte) error {
+	os.WriteFile(name, content, 0644)
+	return nil
 }
 
 // Retrieves and returns the attachments of a message.
