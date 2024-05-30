@@ -10,10 +10,12 @@ import (
 
 var CountMailItem = &Item{Label: "Count Mail", Details: "Count mail in the selected period"}
 var CountMailWithSizeItem = &Item{Label: "Count Mail with size", Details: "Count mail in the selected period with size"}
+var CountMailWithAttachmentsItem = &Item{Label: "Count Mail with attachments", Details: "Count mail with attachments in the selected period"}
+var DownloadAttachmentsItem = &Item{Label: "Download attachments", Details: "Download attachments from the selected period"}
 
 func MailUI() {
 	sel := promptui.Select{}
-	sel.Items = []*Item{YearItem, MonthItem, CountMailItem, CountMailWithSizeItem, back}
+	sel.Items = []*Item{YearItem, MonthItem, CountMailItem, CountMailWithAttachmentsItem, CountMailWithSizeItem, DownloadAttachmentsItem, back}
 	sel.Label = "Select an option"
 	sel.Templates = ItemTemplate
 	var year, month int
@@ -54,6 +56,21 @@ func MailUI() {
 				return
 			}
 			fmt.Println("Found", c, "mail with size", HumanReadableSize(s))
+		case CountMailWithAttachmentsItem.Label:
+			c, err := mail.CountMailWithAttachments(year, month)
+			if err != nil {
+				fmt.Println("Error counting mail", err)
+				return
+			}
+			fmt.Println("Found", c, "mail with attachments")
+		case DownloadAttachmentsItem.Label:
+			_, err := mail.DownloadAttachments(year, month)
+			if err != nil {
+				fmt.Println("Error downloading attachments", err)
+				return
+			}
+			fmt.Println("Attachments downloaded")
+
 		case back.Label:
 			return
 		}

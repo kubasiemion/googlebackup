@@ -9,6 +9,8 @@ const (
 	BACK = "BACK"
 )
 
+const unicorn = "\U0001F984"
+
 // Create a struct to keep cipherLabel and cipherName
 type Item struct {
 	Label        string
@@ -36,8 +38,9 @@ func (i Item) String() string {
 
 var ItemTemplate = &promptui.SelectTemplates{
 	Label:    "{{ . | bold | cyan}}",
-	Inactive: `{{if eq .Label "BACK"}}{{.Label | yellow}}{{else if eq .Label "EXIT"}}{{.Label | red}}{{else}}{{ .Label }}{{with .DisplayValue}}: {{.}}{{end}}{{end}}`,
-	Active:   `{{if eq .Label "BACK"}}{{.Label | yellow | bold | underline}}{{else if eq .Label "EXIT"}}{{.Label | red | bold | underline}}{{else}}{{ .Label | bold | underline }}{{with .DisplayValue}}: {{. | bold}}{{end}}{{end}}`,
+	Inactive: `{{if eq .Label "BACK"}}{{.Label | yellow}}{{else if eq .Label "EXIT"}}{{.Label | red}}{{else}}  {{ .Label }}{{with .DisplayValue}}: {{.}}{{end}}{{end}}`,
+	Active: `{{if eq .Label "BACK"}}{{.Label | yellow | bold | underline}}{{else if eq .Label "EXIT"}}{{.Label | red | bold | underline}}{{else}}` +
+		unicorn + `{{ .Label | bold | underline }}{{with .DisplayValue}}: {{. | bold}}{{end}}{{end}}`,
 	Selected: "{{ .Label | red }}",
 	Details:  "{{ .Details | faint }}",
 }
@@ -45,7 +48,7 @@ var ItemTemplate = &promptui.SelectTemplates{
 var ItemAltTemplate = &promptui.SelectTemplates{
 	Label:    "{{ . | bold | cyan}}",
 	Inactive: `{{ . | bold | .Color}}`,
-	Active:   `{{if not eq .Color ""}}{{.Label | .Color | bold | underline}}{{else}}{{ .Label | bold | underline }}{{with .DisplayValue}}: {{. | bold}}{{end}}{{end}}`,
+	Active:   `{{if not eq .Color ""}}{{.Label | .Color | bold | underline}}{{else}}` + unicorn + `{{ .Label | bold | underline }}{{with .DisplayValue}}: {{. | bold}}{{end}}{{end}}`,
 	Selected: "{{ .Label | red }}",
 	Details:  "{{ .Details | faint }}",
 }
